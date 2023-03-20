@@ -17,7 +17,7 @@ import org.testng.Assert;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
-public class TC_001int {
+public class TC_integeration_01 {
 
 	public static void main(String[] args) {
 		ChromeOptions options = new ChromeOptions();
@@ -51,33 +51,38 @@ public class TC_001int {
 
 		driver.findElement(By.xpath("//span[.='Customer']")).click();
 
-		List<WebElement> customersList = driver.findElements(By.xpath("//tr/td[1]"));
 
-		//SORTED LIST
-		ArrayList<String> sortedList= new ArrayList();
-		for(WebElement customer:customersList) {
-			sortedList.add(customer.getText());
-		}
-		Collections.sort(sortedList);
+		int totalPages=65;	
+		boolean flag=false;
+		String custName="";
+		int count=0;
+		ArrayList<String> sortedList=null;
+		ArrayList<String> orgList=null;
+		
+		for(int p=1;p<=totalPages;p++) {
+			WebElement activePage = driver.findElement(By.xpath("//ul/li[@class='paginate_button page-item active']/a"));
+			activePage.click();
 
-		System.out.println(sortedList);
-		//ORIGINAL LIST
-		ArrayList<String> orgList= new ArrayList();
-		for(WebElement customer:customersList) {
-			sortedList.add(customer.getText());
+			int rows=driver.findElements(By.xpath("//tbody/tr")).size();
+		
+			for(int r=1;r<=rows;r++) {
+				List<WebElement> customersList = driver.findElements(By.xpath("//tr/td["+r+"]"));
+				//SORTED LIST
+				sortedList= new ArrayList();
+			}
+			if(!(orgList.equals(sortedList))) {
+				break;
+			}
+			else {
+				String pageNo=Integer.toString(p+1);
+				driver.findElement(By.xpath("//ul/li[@class='paginate_button page-item ']/a[.='"+pageNo+"']")).click();
+			}
 		}
 		
-		if(sortedList.equals(orgList)) {
-			System.out.println("pass");
-		}
-		else {
-			System.out.println("fail");
-		}
-		
 
 
-
-
-	}
+	}	
 
 }
+
+

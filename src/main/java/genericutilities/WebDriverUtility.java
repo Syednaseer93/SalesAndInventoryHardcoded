@@ -1,5 +1,6 @@
 package genericutilities;
 
+import java.awt.AWTException;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.checkerframework.checker.units.qual.K;
@@ -20,6 +22,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -33,6 +36,20 @@ public class WebDriverUtility {
 	public void maximizePage(WebDriver driver) {
 		driver.manage().window().maximize();
 	}
+	public void waitTillPageLoad(WebDriver driver, int duration) {
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(duration));
+	}
+	public ChromeOptions setChromeOptionsDisableNotifications() {
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--remote-allow-origins=*");
+		options.addArguments("--disable-notifications");
+		return options;
+	}
+	public static void setFirefoxOptionsDisableNotifications() {
+		FirefoxOptions options = new FirefoxOptions();
+		options.addArguments("--remote-allow-origins=*");
+		options.addArguments("--disable-notifications");
+	}
 	public static void capturePageScreenshot(WebDriver driver, String path){
 		TakesScreenshot ts= ((TakesScreenshot)driver);
 		File src = ts.getScreenshotAs(OutputType.FILE);
@@ -41,11 +58,10 @@ public class WebDriverUtility {
 			FileUtils.copyDirectory(src, dst);
 		}
 		catch(Exception e) {
-			e.printStackTrace();
 		}
 	}
 	public static void captureWebElementScreenshot(WebDriver driver, String path, WebElement element) {
-		
+
 		File src = element.getScreenshotAs(OutputType.FILE);
 		File dst= new File(path);
 		try {
@@ -71,7 +87,7 @@ public class WebDriverUtility {
 				nextButton.click();	
 			}	
 		}
-		
+
 		for (WebElement date : allDays) {
 			String tempDate = date.getText();
 			if (tempDate.equals(day)) {
@@ -81,9 +97,10 @@ public class WebDriverUtility {
 		}
 	}
 
-	public void selectByVisibleText(WebElement element, String text) {
+	public static Select selectByVisibleText(WebElement element, String text) {
 		Select s= new Select(element);
 		s.selectByVisibleText(text);
+		return s;
 	}
 
 	public void selectByIndex(WebElement element, int index) {
@@ -143,8 +160,8 @@ public class WebDriverUtility {
 		JavascriptExecutor js=(JavascriptExecutor)driver;
 		js.executeScript("window.scrollBy(0,"+value+")");
 	}
-	
-	
+
+
 	public static void scrollPageup(WebDriver driver)
 	{
 		JavascriptExecutor js=(JavascriptExecutor)driver;
@@ -154,7 +171,7 @@ public class WebDriverUtility {
 		JavascriptExecutor js=(JavascriptExecutor)driver;
 		js.executeScript("arguments[0].scrollIntoView(true);", element);		
 	}
-	
+
 
 	public static void zoomPage(WebDriver driver, int zoomPercent)
 	{
@@ -214,14 +231,11 @@ public class WebDriverUtility {
 		action.dragAndDropBy(srcElement, x, y).perform();
 	}
 
-	public  void KeyPressEnter() {
-		try {
-			Robot r= new Robot();
-			r.keyPress(KeyEvent.VK_ENTER);
-		}
-		catch(Exception e) {
+	public static Robot KeyPressEnter() throws AWTException {
 
-		}	
+		Robot r= new Robot();
+		r.keyPress(KeyEvent.VK_ENTER);
+		return r;
 	}
 
 	public  void KeyRelease() {
@@ -252,36 +266,29 @@ public class WebDriverUtility {
 		driver.switchTo().frame(element);
 	}
 
-	public String getChildWindowID(WebDriver driver) {
+	public String getChildWindowID(WebDriver driver, String title) {
 		Set<String> wIDS = driver.getWindowHandles();
-		String childWindowID="";
-		String parentWindowID="";
+		String WindowID="";
 		Iterator<String> it = wIDS.iterator();
+		String actualTitle="";
 		while(it.hasNext()) {	
-			parentWindowID=it.next();
-			childWindowID=it.next();
-		}	
-		return childWindowID;
+			WindowID=it.next();
+			actualTitle =driver.switchTo().window(WindowID).getTitle();	
+		}
+		if(actualTitle.equals(title)) {
+			return WindowID;
+		}
+		else {
+			return null;
+		}
 	}
-	
-	public String getWindowID(WebDriver driver) {
-		Set<String> wIDS = driver.getWindowHandles();
-		String childWindowID="";
-		String parentWindowID="";
-		Iterator<String> it = wIDS.iterator();
-		while(it.hasNext()) {	
-			parentWindowID=it.next();
-			childWindowID=it.next();
-		}	
-		return parentWindowID;
-	}
-	
+
 	public void waitUntilElementVisible(WebDriver driver, WebElement element, int duration) {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(duration));
 		wait.until(ExpectedConditions.visibilityOf(element));
 	}
-	
-	
+
+
 	public void waitUntilElementClickable(WebDriver driver, WebElement element, int duration) {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(duration));
 		wait.until(ExpectedConditions.elementToBeClickable(element));
@@ -290,10 +297,10 @@ public class WebDriverUtility {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(duration));
 		wait.until(ExpectedConditions.titleContains(title));
 	}
-	
-	
-	
-	public static void main(String[] args) throws InterruptedException {
+
+
+
+	public static void main(String[] args) throws InterruptedException, AWTException {
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--remote-allow-origins=*");
 		options.addArguments("--disable-notifications");
@@ -301,8 +308,7 @@ public class WebDriverUtility {
 		WebDriver driver = new ChromeDriver(options);
 		driver.get("https://www.redbus.in");
 		//capturePageScreenshot(driver,"c:\\ElementScreenshot.jpg");
-	
-		
+
 	}
-	
+
 }

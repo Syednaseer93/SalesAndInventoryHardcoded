@@ -12,7 +12,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 public class ExcelUtility {
 
 
-	public static int getLastRowNumber(String sheet, String path) {
+	public int getLastRowNumber(String sheet, String path) {
 		int row = 0;
 		try {
 			Workbook wb = WorkbookFactory.create(new FileInputStream(path));
@@ -22,7 +22,7 @@ public class ExcelUtility {
 		return row;
 	}
 
-	public static int getLastColumnNumber(String sheet, String path, int row) {
+	public int getLastColumnNumber(String sheet, String path, int row) {
 		int column = 0;
 		try {
 			Workbook wb = WorkbookFactory.create(new FileInputStream(path));
@@ -32,7 +32,7 @@ public class ExcelUtility {
 		return column;
 	}
 
-	public static String getCellData(String sheet, String path, int row, int column) {
+	public  String getCellData(String sheet, String path, int row, int column) {
 		String data = "";
 		try {
 			Workbook wb = WorkbookFactory.create(new FileInputStream(path));
@@ -41,7 +41,7 @@ public class ExcelUtility {
 		}
 		return data;
 	}
-	public static void setCellValue(String sheet, String path, int r, int cc, String value) {
+	public void setCellValue(String sheet, String path, int r, int cc, String value) {
 		try {
 			Workbook wb = WorkbookFactory.create(new FileInputStream(path));
 			wb.getSheet(sheet).getRow(r).createCell(cc).setCellValue(value);
